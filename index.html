@@ -1,1 +1,154 @@
-Test Page
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Mlgroupware : This is a machine learning project for predicting how well 6 participants did weight lifting exercises using a dataset from Groupware">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Mlgroupware</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/jhoegger/MLGroupware">View on GitHub</a>
+
+          <h1 id="project_title">Mlgroupware</h1>
+          <h2 id="project_tagline">This is a machine learning project for predicting how well 6 participants did weight lifting exercises using a dataset from Groupware</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/jhoegger/MLGroupware/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/jhoegger/MLGroupware/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <hr>
+
+<p>title: "MLGroupware"
+author: "John Hoegger"
+date: "Saturday, December 20, 2014"</p>
+
+<h2>
+<a id="output-html_document" class="anchor" href="#output-html_document" aria-hidden="true"><span class="octicon octicon-link"></span></a>output: html_document</h2>
+
+<h3>
+<a id="machine-learning-project" class="anchor" href="#machine-learning-project" aria-hidden="true"><span class="octicon octicon-link"></span></a>Machine Learning Project</h3>
+
+<h4>
+<a id="johns-hopkins-university-coursera" class="anchor" href="#johns-hopkins-university-coursera" aria-hidden="true"><span class="octicon octicon-link"></span></a>Johns Hopkins University (Coursera)</h4>
+
+<h2>
+<a id="background" class="anchor" href="#background" aria-hidden="true"><span class="octicon octicon-link"></span></a>Background</h2>
+
+<p>Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. </p>
+
+<p>My goal of this project is to use data from accelerometers on the belt, forearm, arm and dumbell of 6 participants to predict how well they were performing weight lifting.  </p>
+
+<p>Six young health participants were asked to perform one set of 10 repetitions of barbell lifts correctly and incorrectly in 5 different ways. These were labeled as:
+1. Exactly according to the specification   (Class A)
+2. Throwing the elbows to the front         (Class B)
+3. Lifting the dumbbell only halfway        (Class C)
+4. Lowering the dumbbell only halfway       (Class D) 
+5. Throwing the hips to the front           (Class E)</p>
+
+<p>More information is available from the website here: <a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a> (see the section on the Weight Lifting Exercise Dataset). </p>
+
+<p>The training data is available here: 
+<a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv</a></p>
+
+<p>The test data is available here: 
+<a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv</a></p>
+
+<h4>
+<a id="load-the-libraries" class="anchor" href="#load-the-libraries" aria-hidden="true"><span class="octicon octicon-link"></span></a>Load the libraries</h4>
+
+<div class="highlight highlight-r"><pre>library(<span class="pl-vo">caret</span>)
+library(<span class="pl-vo">randomForest</span>)</pre></div>
+
+<h4>
+<a id="load-the-data" class="anchor" href="#load-the-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Load the data</h4>
+
+<p>Remove the first column, as it is an index. The last column in the test data is also an index that can be removed</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-vo">training</span> <span class="pl-k">&lt;-</span> read.csv(<span class="pl-s1"><span class="pl-pds">"</span>pml-training.csv<span class="pl-pds">"</span></span>, <span class="pl-v">header</span><span class="pl-k">=</span><span class="pl-c1">TRUE</span>, <span class="pl-v">na.strings</span><span class="pl-k">=</span>c(<span class="pl-s1"><span class="pl-pds">"</span>NA<span class="pl-pds">"</span></span>,<span class="pl-s1"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>)) 
+<span class="pl-vo">testing</span> <span class="pl-k">&lt;-</span> read.csv(<span class="pl-s1"><span class="pl-pds">"</span>pml-testing.csv<span class="pl-pds">"</span></span>, <span class="pl-v">header</span><span class="pl-k">=</span><span class="pl-c1">TRUE</span>, <span class="pl-v">na.strings</span><span class="pl-k">=</span>c(<span class="pl-s1"><span class="pl-pds">"</span>NA<span class="pl-pds">"</span></span>,<span class="pl-s1"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>))
+
+<span class="pl-vo">training</span> <span class="pl-k">&lt;-</span> <span class="pl-vo">training</span>[,<span class="pl-k">-</span><span class="pl-c1">1</span>]
+<span class="pl-vo">testing</span>  <span class="pl-k">&lt;-</span> <span class="pl-vo">testing</span> [,<span class="pl-k">-</span><span class="pl-c1">1</span>]
+<span class="pl-vo">testing</span>  <span class="pl-k">&lt;-</span> <span class="pl-vo">testing</span> [,<span class="pl-k">-</span>ncol(<span class="pl-vo">testing</span>)]</pre></div>
+
+<p>subset the data to allow for cross validation with 30% of the data</p>
+
+<div class="highlight highlight-r"><pre>set.seed(<span class="pl-c1">111</span>)
+<span class="pl-vo">inTrain</span> <span class="pl-k">&lt;-</span> createDataPartition(<span class="pl-v">y</span> <span class="pl-k">=</span> <span class="pl-vo">training</span><span class="pl-k">$</span><span class="pl-vo">classe</span>, <span class="pl-v">p</span> <span class="pl-k">=</span> <span class="pl-c1">0.7</span>, <span class="pl-v">list</span><span class="pl-k">=</span><span class="pl-c1">FALSE</span>)
+<span class="pl-vo">training</span> <span class="pl-k">&lt;-</span> <span class="pl-vo">training</span>[<span class="pl-vo">inTrain</span>,]
+<span class="pl-vo">validate</span> <span class="pl-k">&lt;-</span> <span class="pl-vo">training</span>[<span class="pl-k">-</span><span class="pl-vo">inTrain</span>,]</pre></div>
+
+<p>From looking at the data I noticed that there are a lot of columns that mainly contain NAs. These columns will not make good predictors and can be removed, which reduces the total number of columns that we need to work with. There are a lot of columns that contain 19216 NAs out of the total 19622 obersations. I will exclude all columns that have more than 90% NAs.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-vo">cutOffThreshold</span> <span class="pl-k">&lt;-</span> <span class="pl-c1">0.9</span> <span class="pl-k">*</span> nrow(<span class="pl-vo">training</span>)
+<span class="pl-vo">selectedColumns</span> <span class="pl-k">&lt;-</span> c((colSums(<span class="pl-k">!</span>is.na(<span class="pl-vo">training</span>[,<span class="pl-k">-</span>ncol(<span class="pl-vo">training</span>)])) 
+                    <span class="pl-k">&gt;</span><span class="pl-k">=</span> <span class="pl-vo">cutOffThreshold</span>))
+
+<span class="pl-vo">training</span>   <span class="pl-k">&lt;-</span>  <span class="pl-vo">training</span>[,<span class="pl-vo">selectedColumns</span>]
+<span class="pl-vo">validate</span> <span class="pl-k">&lt;-</span> <span class="pl-vo">validate</span>[,<span class="pl-vo">selectedColumns</span>]
+<span class="pl-vo">testing</span> <span class="pl-k">&lt;-</span> <span class="pl-vo">testing</span>[,<span class="pl-vo">selectedColumns</span>]</pre></div>
+
+<p>This has reduced the number of columns from 160 down to just 59</p>
+
+<h3>
+<a id="selecting-the-model" class="anchor" href="#selecting-the-model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Selecting the Model</h3>
+
+<p>I decided that I would use Random Forest for the training model. I have set a seed
+so that the results can be reproducible. </p>
+
+<p>Using Random Forest on nearly 15,000 observations and 59 variables takes a few minutes to run </p>
+
+<div class="highlight highlight-r"><pre><span class="pl-vo">modFit</span> <span class="pl-k">&lt;-</span> randomForest(<span class="pl-vo">classe</span><span class="pl-k">~</span>.,<span class="pl-v">data</span><span class="pl-k">=</span><span class="pl-vo">training</span>)
+<span class="pl-vo">modFit</span>
+
+<span class="pl-vo">predVal</span> <span class="pl-k">&lt;-</span> predict(<span class="pl-vo">modFit</span>, <span class="pl-vo">validate</span>)
+confusionMatrix(<span class="pl-vo">predVal</span>, <span class="pl-vo">validate</span><span class="pl-k">$</span><span class="pl-vo">classe</span>)
+
+varImpPlot(<span class="pl-vo">modFit</span>, nrow(<span class="pl-vo">modFit</span><span class="pl-k">$</span><span class="pl-vo">importance</span>))</pre></div>
+
+<h3>
+<a id="sample-error" class="anchor" href="#sample-error" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sample Error</h3>
+
+<pre><code>Accuracy : 1          
+95% CI : (0.9991, 1)
+Sensitivity &amp; Specificity are 1 in each class
+</code></pre>
+
+<h3>
+<a id="test-data" class="anchor" href="#test-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Test Data</h3>
+
+<p>Now predict using the test data</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-vo">testing</span> <span class="pl-k">&lt;-</span> rbind(<span class="pl-vo">training</span>[<span class="pl-c1">2</span>,<span class="pl-k">-</span>ncol(<span class="pl-vo">training</span>)], <span class="pl-vo">testing</span>)
+<span class="pl-vo">predTest</span> <span class="pl-k">&lt;-</span> predict(<span class="pl-vo">modFit</span>, <span class="pl-vo">testing</span>[<span class="pl-k">-</span><span class="pl-c1">1</span>,])
+<span class="pl-vo">predTest</span></pre></div>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Mlgroupware maintained by <a href="https://github.com/jhoegger">jhoegger</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
